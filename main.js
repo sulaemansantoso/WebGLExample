@@ -1,3 +1,15 @@
+
+var vertexShaderText = 
+[
+    'precision mediump float;',
+    '',
+    'attribute vec2 vertPosition'
+
+].join('\n');
+
+
+
+
 var handler = document.getElementById('myCanvas');
 var gl = handler.getContext('webgl');
 
