@@ -3,7 +3,7 @@ initWebGL = function() {
     [
         'precision mediump float;',
         '',
-        'attribute vec2 vertPosition',
+        'attribute vec2 vertPosition;',
         '',
         'void main()',
         '{',
@@ -35,28 +35,81 @@ initWebGL = function() {
     gl.clear(gl.COLOR_BUFFER_BIT);
 
     var vertexShader = gl.createShader(gl.VERTEX_SHADER);
-    var fragmentShader = gl.createShader(gl.FRAGEMENT_SHADER);
+    var fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
 
-    gl.ShaderSource(vertexShader, vertexShaderText);
-    gl.ShaderSource(vertexShader, vertexShaderText);
+    gl.shaderSource(vertexShader, vertexShaderText);
+    gl.shaderSource(fragmentShader, fragmentShaderText);
 
     gl.compileShader(vertexShader);
 
-    if (!gl.getShaderParameter(vertexShader,gl_COMPILE_STATUS)){
+    if (!gl.getShaderParameter(vertexShader,gl.COMPILE_STATUS)){
         console.error('ERROR COMPILING VERTEX SHADER',gl.getShaderInfoLog(vertexShader));
         return;
     }
 
     gl.compileShader(fragmentShader);
-    if (!gl.getShaderParameter(fragmentShader,gl_COMPILE_STATUS)){
+    if (!gl.getShaderParameter(fragmentShader,gl.COMPILE_STATUS)){
         console.error('ERROR COMPILING FRAGMENT SHADER',gl.getShaderInfoLog(fragmentShader));
         return;
     }
 
     var program = gl.createProgram();
-    gl.attachShader(vertexShader);
-    gl.attachShader(fragmentShader);
+    gl.attachShader(program,vertexShader);
+    gl.attachShader(program,fragmentShader);
     gl.linkProgram(program);
     
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+        console.error('ERROR linking program', gl.getProgramInfoLog(program));
+        return;
+    }
+
+    gl.validateProgram(program);
+    if(!gl.getProgramParameter(program, gl.VALIDATE_STATUS)){
+        console.error('ERROR validating program', gl.getProgramInfoLog(program));
+        return;
+    }
+
+
+    //Create buffer
+    var triangle_vertices = [
+        //X,Y
+        0.0, 0.5,
+        -0.5, -0.5,
+        0.5, -0.5,
+
+        0.1, 0.5,
+        1.1, 0.5,
+        0.6, -0.5
+    ];
+
+    var triangleVertexBufferObject = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexBufferObject );
+    gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(triangle_vertices),gl.STATIC_DRAW);
+
+    var positionAtrribLocation = gl.getAttribLocation(program,'vertPosition');
+    gl.vertexAttribPointer(
+        positionAtrribLocation,
+        2,
+        gl.FLOAT,
+        gl.FALSE,
+        2 * Float32Array.BYTES_PER_ELEMENT,
+        0
+    );
+
+    gl.enableVertexAttribArray(positionAtrribLocation);
+
+
+    gl.useProgram(program);
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
+    /*
+        var loop = function() {
+            updateworld();
+            renderworld();
+            if (running) {
+                requestAnimationFrame(loop);
+            }
+            requestAnimationFrame(loop);
+        }
+    */
 
 }
